@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حساب المساحة باستخدام طريقة شكوريل</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            direction: rtl;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-top: 20px;
+        }
+        select, input, button {
+            padding: 12px;
+            font-size: 16px;
+            margin: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result-table {
+            width: 80%;
+            margin: 30px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+        .result-table th, .result-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .result-table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .result-table td {
+            background-color: #f9f9f9;
+        }
+        .footer {
+            margin-top: 50px;
+            font-size: 14px;
+            color: gray;
+            text-align: center;
+        }
+        .disclaimer {
+            font-size: 12px;
+            color: red;
+        }
+        /* تحسين التوافق مع الأجهزة */
+        @media (max-width: 768px) {
+            select, input, button {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>حساب المساحة باستخدام طريقة شكوريل</h1>
+    <p>اختَر وحدة القياس:</p>
+    <select id="unitType">
+        <option value="m">متر</option>
+        <option value="cm">سانتيمتر</option>
+        <option value="qasba">قصبة</option>
+        <option value="halfQasba">نصف القصبة</option>
+    </select>
+
+    <p>أدخل الأطوال والعروض:</p>
+    <input type="number" id="length1" placeholder="الطول الأول">
+    <br>
+    <input type="number" id="width1" placeholder="العرض الأول">
+    <br>
+    <input type="number" id="length2" placeholder="الطول الثاني">
+    <br>
+    <input type="number" id="width2" placeholder="العرض الثاني">
+    <br>
+    <input type="number" id="diagonal" placeholder="البُعد القطري (اختياري)">
+    <br><br>
+    <button onclick="calculateArea()">احسب المساحة</button>
+
+    <div class="result">
+        <table class="result-table" id="resultTable" style="display: none;">
+            <tr>
+                <th>المساحة الإجمالية بالمتر المربع</th>
+                <th>المساحة بالفدان</th>
+                <th>المساحة بالقيراط</th>
+                <th>المساحة بالسهم</th>
+                <th>المساحة بالقدم المربع</th>
+                <th>المساحة الإجمالية النصية</th>
+            </tr>
+            <tr>
+                <td id="resultM"></td>
+                <td id="resultFeddan"></td>
+                <td id="resultQirat"></td>
+                <td id="resultSahm"></td>
+                <td id="resultFt2"></td>
+                <td id="resultTotal"></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p class="disclaimer">
+            التحذير: هذا التطبيق يهدف إلى حساب المساحات بشكل تقريبي فقط بناءً على القيم المدخلة. النتائج قد تختلف عن القياسات الدقيقة. يُرجى الرجوع إلى مساح معتمد لتثبيت المساحات الموثقة. 
+        </p>
+        <p>حقوق النشر محفوظة © 2024. إعداد وتصميم: محاسب أحمد مبروك.</p>
+    </div>
+
+    <script>
+        // دالة لحساب المساحة باستخدام طريقة شكوريل
+        function calculateArea() {
+            const unitType = document.getElementById("unitType").value;
+            const length1 = parseFloat(document.getElementById("length1").value) || 0;
+            const width1 = parseFloat(document.getElementById("width1").value) || 0;
+            const length2 = parseFloat(document.getElementById("length2").value) || 0;
+            const width2 = parseFloat(document.getElementById("width2").value) || 0;
+            const diagonal = parseFloat(document.getElementById("diagonal").value) || 0;
+
+            let areaInMeters;
+
+            // حساب المساحة بالأمتار بناءً على الأبعاد المدخلة
+            if (unitType === "cm") {
+                areaInMeters = calculateInMeters(length1 / 100, width1 / 100, length2 / 100, width2 / 100);
+            } else if (unitType === "qasba") {
+                areaInMeters = calculateInMeters(length1 * 3.55, width1 * 3.55, length2 * 3.55, width2 * 3.55);
+            } else if (unitType === "halfQasba") {
+                areaInMeters = calculateInMeters(length1 * 1.775, width1 * 1.775, length2 * 1.775, width2 * 1.775);
+            } else {
+                areaInMeters = calculateInMeters(length1, width1, length2, width2);
+            }
+
+            // إضافة الحساب بناءً على البُعد القطري
+            if (diagonal) {
+                const diagonalArea = (diagonal * diagonal) / 2;  // استخدام القطر لحساب المساحة التقريبية
+                areaInMeters += diagonalArea;
+            }
+
+            // تحويل المساحة إلى وحدات قياس أخرى
+            let remainingArea = areaInMeters;
+            const areaInFeddan = Math.floor(remainingArea / 4200.83);
+            remainingArea -= areaInFeddan * 4200.83;
+
+            const areaInQirat = Math.floor(remainingArea / 175.03);
+            remainingArea -= areaInQirat * 175.03;
+
+            const areaInSahm = Math.floor(remainingArea / 7.29);
+            remainingArea -= areaInSahm * 7.29;
+
+            const areaInFeet2 = areaInMeters * 10.764; // تحويل من متر مربع إلى قدم مربع
+
+            // عرض النتائج
+            document.getElementById("resultTable").style.display = "block";
+            document.getElementById("resultM").innerText = `${areaInMeters.toFixed(2)} متر مربع`;
+            document.getElementById("resultFeddan").innerText = `${areaInFeddan} فدان`;
+            document.getElementById("resultQirat").innerText = `${areaInQirat} قيراط`;
+            document.getElementById("resultSahm").innerText = `${areaInSahm} سهم`;
+            document.getElementById("resultFt2").innerText = `${areaInFeet2.toFixed(2)} قدم مربع`;
+            document.getElementById("resultTotal").innerText = `${areaInFeddan} فدان و ${areaInQirat} قيراط و ${areaInSahm} سهم`;
+        }
+
+        // دالة لحساب المساحة بناءً على الأبعاد المدخلة
+        function calculateInMeters(length1, width1, length2, width2) {
+            let area = (length1 * width1 + length2 * width2) / 2;  // حساب المساحة
+            return area;
+        }
+    </script>
+</body>
+</html>
